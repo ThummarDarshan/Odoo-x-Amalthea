@@ -1,7 +1,6 @@
 # Odoo-x-Amalthea
 
 
-[# odooXNMIT]
 
 <h2>🧵 PROBLEM STATEMENT - 1 </h2> <br>
 Expens Management
