@@ -1,5 +1,5 @@
 // const host = "https://expense-tracker-app-knl1.onrender.com";
-const host = "http://localhost:5000";
+const host = "http://localhost:5001";
 
 // Authentication APIs
 export const registerAPI = `${host}/api/auth/register`;

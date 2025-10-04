@@ -15,6 +15,8 @@ const TableData = (props) => {
   const [currId, setCurrId] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [user, setUser] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   const handleEditClick = (itemKey) => {
     // const buttonId = e.target.id;
@@ -103,6 +105,11 @@ const TableData = (props) => {
     return <Badge bg="success">Approved</Badge>;
   };
 
+  const handleRowClick = (item) => {
+    setSelectedTransaction(item);
+    setShowDetails(true);
+  };
+
   useEffect(() => {
     setUser(props.user);
     setTransactions(props.data);
@@ -125,7 +132,7 @@ const TableData = (props) => {
           </thead>
           <tbody className="text-white">
             {props.data.map((item, index) => (
-              <tr key={index}>
+              <tr key={index} style={{ cursor: 'pointer' }} onClick={() => handleRowClick(item)}>
                 <td>{moment(item.date).format("YYYY-MM-DD")}</td>
                 <td>{item.title}</td>
                 <td>{item.amount}</td>
@@ -138,14 +145,14 @@ const TableData = (props) => {
                       sx={{ cursor: "pointer" }}
                       key={item._id}
                       id={item._id}
-                      onClick={() => handleEditClick(item._id)}
+                      onClick={(e) => { e.stopPropagation(); handleEditClick(item._id); }}
                     />
 
                     <DeleteForeverIcon
                       sx={{ color: "red", cursor: "pointer" }}
                       key={index}
                       id={item._id}
-                      onClick={() => handleDeleteClick(item._id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteClick(item._id); }}
                     />
 
                     {editingTransaction ? (
@@ -280,6 +287,50 @@ const TableData = (props) => {
           </tbody>
         </Table>
       </Container>
+
+      {/* Details Modal for row click */}
+      <Modal show={showDetails} onHide={() => setShowDetails(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Transaction Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedTransaction && (
+            <div>
+              <p><strong>Title:</strong> {selectedTransaction.title}</p>
+              <p><strong>Amount:</strong> {selectedTransaction.amount}</p>
+              <p><strong>Type:</strong> {selectedTransaction.transactionType}</p>
+              <p><strong>Category:</strong> {selectedTransaction.category}</p>
+              <p><strong>Date:</strong> {moment(selectedTransaction.date).format("YYYY-MM-DD")}</p>
+              <p><strong>Status:</strong> {selectedTransaction.status}</p>
+              {selectedTransaction.status === 'rejected' && (
+                <p><strong>Rejection Reason:</strong> {selectedTransaction.rejectionReason}</p>
+              )}
+              <hr />
+              <h6>Approval Workflow</h6>
+              <ul>
+                {selectedTransaction.approvalWorkflow && selectedTransaction.approvalWorkflow.length > 0 ? (
+                  selectedTransaction.approvalWorkflow.map((step, idx) => (
+                    <li key={step._id?.$oid || idx}>
+                      <strong>Approver:</strong> {step.approver?.name || step.approver?.$oid}
+                      <br />
+                      <strong>Status:</strong> {step.status}
+                      <br />
+                      <strong>Comments:</strong> {step.comments || 'No comments'}
+                    </li>
+                  ))
+                ) : (
+                  <li>No workflow steps found.</li>
+                )}
+              </ul>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDetails(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

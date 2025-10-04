@@ -15,6 +15,7 @@ const ApprovalDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [action, setAction] = useState('');
   const [comments, setComments] = useState('');
   const [approvalRules, setApprovalRules] = useState([]);
@@ -355,6 +356,13 @@ const ApprovalDashboard = () => {
                           Reject
                         </Button>
                         <Button
+                          variant="outline-dark"
+                          size="sm"
+                          onClick={() => { setSelectedExpense(expense); setShowDetailsModal(true); }}
+                        >
+                          View Details
+                        </Button>
+                        <Button
                           variant="outline-info"
                           size="sm"
                           onClick={async () => {
@@ -526,6 +534,50 @@ const ApprovalDashboard = () => {
             disabled={loading}
           >
             {loading ? 'Processing...' : `${action === 'approve' ? 'Approve' : 'Reject'}`}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Details Modal */}
+      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Expense Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedExpense && (
+            <div>
+              <h6>{selectedExpense.title}</h6>
+              <p><strong>Status:</strong> {getStatusBadge(selectedExpense.status)}</p>
+              {selectedExpense.status === 'rejected' && (
+                <p><strong>Rejection Reason:</strong> {selectedExpense.rejectionReason}</p>
+              )}
+              <p><strong>Amount:</strong> {formatCurrency(selectedExpense.amount, selectedExpense.convertedCurrency)}</p>
+              <p><strong>Submitted by:</strong> {selectedExpense.submittedBy?.name}</p>
+              <p><strong>Date:</strong> {new Date(selectedExpense.date).toLocaleDateString()}</p>
+              <p><strong>Description:</strong> {selectedExpense.description}</p>
+              <hr />
+              <h6>Approval Workflow</h6>
+              <ul>
+                {selectedExpense.approvalWorkflow && selectedExpense.approvalWorkflow.length > 0 ? (
+                  selectedExpense.approvalWorkflow.map((step, idx) => (
+                    <li key={step._id?.$oid || idx}>
+                      <strong>Approver:</strong> {step.approver?.name || step.approver?.$oid}
+                      <br />
+                      <strong>Status:</strong> {step.status}
+                      <br />
+                      <strong>Comments:</strong> {step.comments || 'No comments'}
+                    </li>
+                  ))
+                ) : (
+                  <li>No workflow steps found.</li>
+                )}
+              </ul>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

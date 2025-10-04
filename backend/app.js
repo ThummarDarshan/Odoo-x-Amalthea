@@ -14,7 +14,7 @@ import expenseRoutes from "./Routers/expenseRouter.js";
 import approvalRuleRoutes from "./Routers/approvalRuleRouter.js";
 import path from "path";
 
-dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const app = express();
 
 const port = process.env.PORT;
